@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>AppInfo</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
+	<link rel="stylesheet" href="index.css">
+	<script src="https://unpkg.com/vue"></script>
+	<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+</head>
+<body>
+
+<div class="container is-fluid">
+	<div id="app" class="columns">
+		<div class="column is-one-quarter">
+			<section class="section">
+				<div class="container">
+					<h1 class="title">
+						AppInfo
+					</h1>
+					<p class="subtitle">
+						Web app info
+					</p>
+				</div>
+			</section>
+			<nav class="panel is-primary">
+				<p class="panel-heading">
+					Requests ({{msg.length}})
+					<!--					<a class="" style="float: right">clear</a>-->
+					<button class="button is-danger is-inverted is-outlined is-small" style="float: right"
+							v-if="msg.length > 0" v-on:click="clear()">
+						clear
+					</button>
+				</p>
+				<!--			<div class="panel-block">-->
+				<!--				<p class="control has-icons-left">-->
+				<!--					<input class="input" type="text" placeholder="Search">-->
+				<!--					<span class="icon is-left"><i class="fas fa-search" aria-hidden="true"></i></span>-->
+				<!--				</p>-->
+				<!--			</div>-->
+				<a class="panel-block is-size-7"
+				   v-bind:class="{'is-active': choosedRequestIndex === index}"
+				   v-for="(item, index) in msg" :key="index"
+				   v-on:click="showRequestDetail(index)">
+					<span class="panel-icon"><i class="fas fa-exchange-alt" aria-hidden="true"></i></span>
+					<strong class="mr-2">{{item.request_data.method}}</strong> <span>{{item.request_data.url}}</span>
+				</a>
+				<div class="panel-block is-size-7" v-if="msg.length === 0">
+					Nothing to show ...
+				</div>
+
+			</nav>
+		</div>
+		<div class="column">
+			<div v-if="requestDetail !== null">
+				<section class="hero is-primary mb-5">
+					<div class="hero-body">
+						<div class="container">
+							<h1 class="title">
+								Request #{{requestDetail.id}}
+							</h1>
+							<h2 class="subtitle">
+								{{requestDetail.request_data.method}} {{requestDetail.request_data.url}}
+							</h2>
+						</div>
+					</div>
+				</section>
+				<div class="tabs is-size-7">
+					<ul>
+						<li v-bind:class="{'is-active': tab === 'db_queries'}">
+							<a v-on:click="chooseTab('db_queries')">DB Queries ({{requestDetail.db_queries_count}})</a>
+						</li>
+						<li v-bind:class="{'is-active': tab === 'request_info'}">
+							<a v-on:click="chooseTab('request_info')">Request data</a>
+						</li>
+						<li v-bind:class="{'is-active': tab === 'sessions'}">
+							<a v-on:click="chooseTab('sessions')">Sessions</a>
+						</li>
+					</ul>
+				</div>
+
+				<div class="tab-content is-size-7" v-if="tab === 'db_queries'">
+					<article class="message is-success mb-2" v-for="query in requestDetail.db_queries">
+						<div class="message-body is-size-7">
+							<strong>{{query.time_ms}} ms</strong>
+							<div v-html="sqlSyntax(query.sql)"></div>
+
+							<button v-on:click="showSqlModal(query.sql)">Show</button>
+						</div>
+					</article>
+				</div>
+
+				<div class="tab-content is-size-7" v-if="tab === 'request_info'">
+					<table class="table">
+						<tr v-for="(value, name) in requestDetail.request_data">
+							<td><strong>{{name}}</strong></td>
+							<td v-if="typeof value === 'object' && value !== null">
+								<table class="table">
+									<tr v-for="(_value, _name) in value">
+										<td>{{_name}}</td>
+										<td>{{JSON.stringify(_value, null, 2)}}</td>
+									</tr>
+								</table>
+							</td>
+							<td v-else>{{value}}</td>
+						</tr>
+					</table>
+				</div>
+
+				<div class="tab-content is-size-7" v-if="tab === 'sessions'">
+					<table class="table">
+						<tr v-for="(value, name) in requestDetail.sessions">
+							<td><strong>{{name}}</strong></td>
+							<td v-if="typeof value === 'object' && value !== null">
+								<table class="table">
+									<tr v-for="(_value, _name) in value">
+										<td>{{_name}}</td>
+										<td>{{JSON.stringify(_value, null, 2)}}</td>
+									</tr>
+								</table>
+							</td>
+							<td v-else>{{value}}</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<!-- Modals -->
+		<div class="modal" v-bind:class="{'is-active': sqlModalContent !== null}">
+			<div class="modal-background"></div>
+			<div class="modal-content is-size-5">
+				<div class="notification is-warning is-light" v-html="sqlSyntax(sqlModalContent, true)">
+				</div>
+			</div>
+			<button class="modal-close is-large" v-on:click="showSqlModal(null)" aria-label="close"></button>
+		</div>
+	</div>
+</div>
+
+
+<script>
+	const electron = require('electron');
+	const sqlFormatter = require('sql-formatter');
+
+	const hljs = require('highlight.js/lib/core');
+	// separately require languages
+	hljs.registerLanguage('sql', require('highlight.js/lib/languages/sql'));
+
+	var app = new Vue({
+		el:      '#app',
+		data:    {
+			msg:                 [],
+			choosedRequestIndex: null,
+			requestDetail:       null,
+			tab:                 'db_queries',
+			sqlModalContent:     null
+		},
+		methods: {
+			showRequestDetail: function (index) {
+				this.choosedRequestIndex = index;
+				this.requestDetail = this.msg[ index ];
+			},
+			chooseTab:         function (tab) {
+				this.tab = tab;
+			},
+			sqlSyntax:         function (query, format = false) {
+				if (query === null) {
+					return;
+				}
+
+				if (format === true) {
+					query = sqlFormatter.format(query, {
+						language: "sql", // Defaults to "sql"
+						indent:   "    "   // Defaults to two spaces
+					});
+				}
+
+				return hljs.highlightAuto(query).value;
+			},
+			showSqlModal:      function (content) {
+				this.sqlModalContent = content;
+			},
+			clear:             function () {
+				this.msg = [];
+				this.choosedRequestIndex = null;
+				this.requestDetail = null;
+				this.tab = 'db_queries';
+			}
+		},
+		mounted () {
+			electron.ipcRenderer.on('msg', (event, data) => {
+				this.msg.push(data);
+			});
+		}
+	})
+</script>
+</body>
+</html>
+
+
+

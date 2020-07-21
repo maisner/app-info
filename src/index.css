@@ -5,6 +5,26 @@
 /*  padding: 2rem;*/
 /*}*/
 
+pre.dump {
+	background-color: #0000;
+	font-size: .75rem !important;
+	font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	padding: 0;
+	/*white-space: nowrap;*/
+}
+
+.modal pre.dump {
+	font-size: .94rem !important;
+}
+
+div.sql-container {
+	cursor: pointer;
+}
+
+.modal-content {
+	width: 60rem;
+}
+
 .hljs {
 	display: block;
 	overflow-x: auto;

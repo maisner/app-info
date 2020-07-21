@@ -81,12 +81,16 @@
 				</div>
 
 				<div class="tab-content is-size-7" v-if="tab === 'db_queries'">
-					<article class="message is-success mb-2" v-for="query in requestDetail.db_queries">
+					<article class="message is-success mb-4" v-for="query in requestDetail.db_queries">
 						<div class="message-body is-size-7">
 							<strong>{{query.time_ms}} ms</strong>
-							<div v-html="sqlSyntax(query.sql)"></div>
-
-							<button v-on:click="showSqlModal(query.sql)">Show</button>
+							<span>Results: {{query.row_count}}</span>
+<!--							<button v-on:click="showSqlModal(query.sql_html)">Show</button>-->
+							<div class="sql-container"
+								 v-html="query.sql_html"
+								 v-on:click="showSqlModal(query.sql_html)">
+							</div>
+							<span>{{query.source[0]}}:{{query.source[1]}}</span>
 						</div>
 					</article>
 				</div>
@@ -131,7 +135,7 @@
 		<div class="modal" v-bind:class="{'is-active': sqlModalContent !== null}">
 			<div class="modal-background"></div>
 			<div class="modal-content is-size-5">
-				<div class="notification is-warning is-light" v-html="sqlSyntax(sqlModalContent, true)">
+				<div class="notification is-warning is-light" v-html="sqlModalContent">
 				</div>
 			</div>
 			<button class="modal-close is-large" v-on:click="showSqlModal(null)" aria-label="close"></button>
@@ -191,6 +195,7 @@
 		},
 		mounted () {
 			electron.ipcRenderer.on('msg', (event, data) => {
+				console.log(data);
 				this.msg.push(data);
 			});
 		}

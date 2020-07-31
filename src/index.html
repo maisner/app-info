@@ -85,7 +85,7 @@
 						<div class="message-body is-size-7">
 							<strong>{{query.time_ms}} ms</strong>
 							<span>Results: {{query.row_count}}</span>
-<!--							<button v-on:click="showSqlModal(query.sql_html)">Show</button>-->
+							<!--							<button v-on:click="showSqlModal(query.sql_html)">Show</button>-->
 							<div class="sql-container"
 								 v-html="query.sql_html"
 								 v-on:click="showSqlModal(query.sql_html)">
@@ -146,11 +146,6 @@
 
 <script>
 	const electron = require('electron');
-	const sqlFormatter = require('sql-formatter');
-
-	const hljs = require('highlight.js/lib/core');
-	// separately require languages
-	hljs.registerLanguage('sql', require('highlight.js/lib/languages/sql'));
 
 	var app = new Vue({
 		el:      '#app',
@@ -168,20 +163,6 @@
 			},
 			chooseTab:         function (tab) {
 				this.tab = tab;
-			},
-			sqlSyntax:         function (query, format = false) {
-				if (query === null) {
-					return;
-				}
-
-				if (format === true) {
-					query = sqlFormatter.format(query, {
-						language: "sql", // Defaults to "sql"
-						indent:   "    "   // Defaults to two spaces
-					});
-				}
-
-				return hljs.highlightAuto(query).value;
 			},
 			showSqlModal:      function (content) {
 				this.sqlModalContent = content;

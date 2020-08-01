@@ -5,6 +5,10 @@
 /*  padding: 2rem;*/
 /*}*/
 
+/*body {*/
+/*	user-select: none;*/
+/*}*/
+
 pre.dump {
 	background-color: #0000;
 	font-size: .75rem !important;
@@ -23,6 +27,10 @@ div.sql-container {
 
 .modal-content {
 	width: 60rem;
+}
+
+.menu-request-item.is-active {
+	background-color: #00d1b2;
 }
 
 .hljs {

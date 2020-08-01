@@ -14,21 +14,21 @@
 <div class="container is-fluid">
 	<div id="app" class="columns">
 		<div class="column is-one-quarter">
-			<section class="section">
-				<div class="container">
-					<h1 class="title">
-						AppInfo
-					</h1>
-					<p class="subtitle">
-						Web app info
-					</p>
-				</div>
-			</section>
-			<nav class="panel is-primary">
-				<p class="panel-heading">
+			<!--			<section class="section">-->
+			<!--				<div class="container">-->
+			<!--					<h1 class="title is-size-5">-->
+			<!--						AppInfo-->
+			<!--					</h1>-->
+			<!--					<p class="subtitle is-size-7">-->
+			<!--						Web app info-->
+			<!--					</p>-->
+			<!--				</div>-->
+			<!--			</section>-->
+			<nav class="panel is-light mt-3">
+				<p class="panel-heading is-size-6">
 					Requests ({{msg.length}})
 					<!--					<a class="" style="float: right">clear</a>-->
-					<button class="button is-danger is-inverted is-outlined is-small" style="float: right"
+					<button class="button is-text is-small" style="float: right"
 							v-if="msg.length > 0" v-on:click="clear()">
 						clear
 					</button>
@@ -39,13 +39,19 @@
 				<!--					<span class="icon is-left"><i class="fas fa-search" aria-hidden="true"></i></span>-->
 				<!--				</p>-->
 				<!--			</div>-->
-				<a class="panel-block is-size-7"
-				   v-bind:class="{'is-active': choosedRequestIndex === index}"
-				   v-for="(item, index) in msg" :key="index"
-				   v-on:click="showRequestDetail(index)">
-					<span class="panel-icon"><i class="fas fa-exchange-alt" aria-hidden="true"></i></span>
-					<strong class="mr-2">{{item.request_data.method}}</strong> <span>{{item.request_data.url}}</span>
-				</a>
+				<div class="panel-block is-size-7 menu-request-item"
+					 v-bind:class="{'is-active': choosedRequestIndex === index}"
+					 v-for="(item, index) in msg" :key="index"
+					 v-on:click="showRequestDetail(index)"
+					 style="display: block; cursor: pointer">
+
+					<div class="columns is-vcentered">
+						<div class="column">
+							<strong class="mr-2">{{item.request_data.method}}</strong><br>
+							<span>{{item.request_data.url}}</span>
+						</div>
+					</div>
+				</div>
 				<div class="panel-block is-size-7" v-if="msg.length === 0">
 					Nothing to show ...
 				</div>

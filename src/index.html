@@ -87,6 +87,7 @@
 				</div>
 
 				<div class="tab-content is-size-7" v-if="tab === 'db_queries'">
+					<a v-on:click="sortSqlQueriesByTime()">Sort by time</a>
 					<article class="message is-success mb-4" v-for="query in requestDetail.db_queries">
 						<div class="message-body is-size-7">
 							<strong>{{query.time_ms}} ms</strong>
@@ -96,7 +97,7 @@
 								 v-html="query.sql_html"
 								 v-on:click="showSqlModal(query.sql_html)">
 							</div>
-							<span>{{query.source[0]}}:{{query.source[1]}}</span>
+							<span>{{query.source[ 0 ]}}:{{query.source[ 1 ]}}</span>
 						</div>
 					</article>
 				</div>
@@ -167,17 +168,31 @@
 				this.choosedRequestIndex = index;
 				this.requestDetail = this.msg[ index ];
 			},
-			chooseTab:         function (tab) {
+			chooseTab:            function (tab) {
 				this.tab = tab;
 			},
-			showSqlModal:      function (content) {
+			showSqlModal:         function (content) {
 				this.sqlModalContent = content;
 			},
-			clear:             function () {
+			clear:                function () {
 				this.msg = [];
 				this.choosedRequestIndex = null;
 				this.requestDetail = null;
 				this.tab = 'db_queries';
+			},
+			sortSqlQueriesByTime: function () {
+				let queries = this.requestDetail.db_queries;
+				queries.sort(function (a, b) {
+					if (a.time_ms < b.time_ms) {
+						return -1;
+					}
+					if (a.time_ms > b.time_ms) {
+						return 1;
+					}
+					return 0;
+				});
+
+				console.log(queries);
 			}
 		},
 		mounted () {
